@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>贪吃蛇游戏</title>
     <style>
-        body { text-align: center; font-family: 'Segoe UI', Arial, sans-serif; background: #e6f2ff; }
-        #gameCanvas { background: #e0e7ef; border-radius: 16px; box-shadow: 0 4px 24px #b0c4de; display: block; margin: 20px auto; }
+        body { text-align: center; font-family: 'Segoe UI', Arial, sans-serif; background: #e6f2ff; margin: 0; }
+        #gameCanvas { background: #e0e7ef; border-radius: 16px; box-shadow: 0 4px 24px #b0c4de; display: block; margin: 20px auto; touch-action: none; }
         #score { font-size: 20px; margin-top: 10px; color: #3b5998; }
         #startBtn {
             padding: 10px 32px;
@@ -22,6 +22,39 @@
         #startBtn:hover {
             background: linear-gradient(90deg, #fed6e3 0%, #a8edea 100%);
         }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 24px 0 0 0;
+            user-select: none;
+        }
+        .ctrl-row {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+        .ctrl-btn {
+            width: 56px;
+            height: 56px;
+            margin: 6px;
+            font-size: 28px;
+            background: #f6d365;
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px #b0c4de;
+            color: #3b5998;
+            font-weight: bold;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .ctrl-btn:active {
+            background: #fda085;
+        }
+        @media (max-width: 500px) {
+            #gameCanvas { width: 98vw; height: 98vw; max-width: 400px; max-height: 400px; }
+        }
     </style>
 </head>
 <body>
@@ -29,6 +62,16 @@
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div id="score">分数: 0</div>
     <button id="startBtn">开始游戏</button>
+    <div class="controls">
+        <div class="ctrl-row">
+            <button class="ctrl-btn" id="btn-up">&#8593;</button>
+        </div>
+        <div class="ctrl-row">
+            <button class="ctrl-btn" id="btn-left">&#8592;</button>
+            <button class="ctrl-btn" id="btn-down">&#8595;</button>
+            <button class="ctrl-btn" id="btn-right">&#8594;</button>
+        </div>
+    </div>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -59,6 +102,10 @@
             return pos;
         }
 
+        // 禁止页面滚动（防止手机滑动时页面跟随）
+        document.body.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
+
+        // 方向控制（键盘）
         document.addEventListener('keydown', function(e) {
             if (gameOver) return;
             if (e.key === 'ArrowLeft' && direction !== 'RIGHT') pendingDirection = 'LEFT';
@@ -66,6 +113,24 @@
             else if (e.key === 'ArrowRight' && direction !== 'LEFT') pendingDirection = 'RIGHT';
             else if (e.key === 'ArrowDown' && direction !== 'UP') pendingDirection = 'DOWN';
         });
+
+        // 方向控制（触摸按钮）
+        function setDirection(dir) {
+            if (gameOver) return;
+            if (dir === 'LEFT' && direction !== 'RIGHT') pendingDirection = 'LEFT';
+            else if (dir === 'UP' && direction !== 'DOWN') pendingDirection = 'UP';
+            else if (dir === 'RIGHT' && direction !== 'LEFT') pendingDirection = 'RIGHT';
+            else if (dir === 'DOWN' && direction !== 'UP') pendingDirection = 'DOWN';
+        }
+        document.getElementById('btn-up').addEventListener('touchstart', function(e){ e.preventDefault(); setDirection('UP'); });
+        document.getElementById('btn-down').addEventListener('touchstart', function(e){ e.preventDefault(); setDirection('DOWN'); });
+        document.getElementById('btn-left').addEventListener('touchstart', function(e){ e.preventDefault(); setDirection('LEFT'); });
+        document.getElementById('btn-right').addEventListener('touchstart', function(e){ e.preventDefault(); setDirection('RIGHT'); });
+        // 兼容点击
+        document.getElementById('btn-up').addEventListener('click', function(){ setDirection('UP'); });
+        document.getElementById('btn-down').addEventListener('click', function(){ setDirection('DOWN'); });
+        document.getElementById('btn-left').addEventListener('click', function(){ setDirection('LEFT'); });
+        document.getElementById('btn-right').addEventListener('click', function(){ setDirection('RIGHT'); });
 
         startBtn.onclick = function() {
             resetGame();
